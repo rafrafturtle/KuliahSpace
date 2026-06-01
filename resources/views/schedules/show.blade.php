@@ -17,9 +17,8 @@
                 <dt>Kelas</dt><dd>{{ $schedule->class_name }}</dd>
                 <dt>Dosen</dt><dd>{{ $schedule->lecturer?->name }}</dd>
                 <dt>Ruangan</dt><dd>{{ $schedule->room?->code }} - {{ $schedule->room?->name }}</dd>
-                <dt>Hari</dt><dd>{{ $schedule->day_of_week }}</dd>
+                <dt>Hari</dt><dd>{{ $dayLabels[$schedule->day_of_week] ?? $schedule->day_of_week }}</dd>
                 <dt>Waktu</dt><dd>{{ substr($schedule->start_time, 0, 5) }}-{{ substr($schedule->end_time, 0, 5) }}</dd>
-                <dt>Minggu Ke</dt><dd>{{ $schedule->week_number ?? '-' }}</dd>
                 <dt>Semester</dt><dd>{{ $schedule->semester?->name }}</dd>
                 <dt>Tahun Akademik</dt><dd>{{ $schedule->academicYear?->name }}</dd>
                 <dt>Status</dt><dd>@include('partials.status-badge', ['status' => $schedule->is_active])</dd>

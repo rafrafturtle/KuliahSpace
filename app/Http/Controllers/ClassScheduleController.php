@@ -111,7 +111,10 @@ class ClassScheduleController extends Controller
     {
         $schedule->load(['course', 'lecturer', 'room', 'semester', 'academicYear']);
 
-        return view('schedules.show', compact('schedule'));
+        return view('schedules.show', [
+            'schedule' => $schedule,
+            'dayLabels' => $this->dayLabels(),
+        ]);
     }
 
     public function edit(ClassSchedule $schedule): View
@@ -188,6 +191,7 @@ class ClassScheduleController extends Controller
             'semesters' => Semester::orderByDesc('is_active')->orderBy('name')->get(),
             'academicYears' => AcademicYear::orderByDesc('is_active')->orderByDesc('name')->get(),
             'days' => $this->days(),
+            'dayLabels' => $this->dayLabels(),
         ];
     }
 

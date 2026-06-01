@@ -7,8 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "barryvdh/laravel-dompdf": "^3.1",
         "laravel/framework": "^13.7",
         "laravel/tinker": "^3.0",
+        "maatwebsite/excel": "^3.1",
         "overtrue/laravel-lang": "^3.0",
         "ramsey/uuid": "^4.9",
         "silber/bouncer": "^1.0"

@@ -95,7 +95,7 @@
                                 <article class="room-card">
                                     <div class="actions" style="justify-content: space-between;">
                                         <h3>{{ $schedule->room?->code }} - {{ $schedule->room?->name }}</h3>
-                                        @include('partials.status-badge', ['status' => 'used'])
+                                        @include('partials.status-badge', ['status' => 'used', 'badgeLabel' => 'Terpakai'])
                                     </div>
                                     <div>
                                         <strong>{{ $schedule->course?->name }}</strong>
@@ -130,7 +130,7 @@
                                 <article class="room-card">
                                     <div class="actions" style="justify-content: space-between;">
                                         <h3>{{ $room->code }} - {{ $room->name }}</h3>
-                                        @include('partials.status-badge', ['status' => 'available'])
+                                        @include('partials.status-badge', ['status' => 'available', 'badgeLabel' => 'Tersedia'])
                                     </div>
                                     <div class="room-card-meta">
                                         <span>Gedung: {{ $room->building ?? '-' }}</span>

@@ -1,24 +1,26 @@
 @extends('layouts.app')
 
 @section('title', 'Permintaan Ruangan')
-@section('subtitle', 'Ajukan, tinjau, setujui, atau tolak penggunaan ruangan.')
+@section('subtitle', 'Pantau pengajuan ruang yang masih pending dan perlu ditindaklanjuti.')
 
 @section('content')
     <div class="panel">
         <div class="panel-header">
             <form class="search-form" method="GET" action="{{ route('room-requests.index') }}">
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari pemohon, ruangan, tujuan">
-                <select name="status">
-                    <option value="">Semua status</option>
-                    @foreach (\App\Models\RoomRequest::STATUSES as $option)
-                        <option value="{{ $option }}" @selected($status === $option)>{{ str($option)->headline() }}</option>
-                    @endforeach
-                </select>
                 <button class="btn btn-soft" type="submit">Filter</button>
+                @if ($search)
+                    <a class="btn" href="{{ route('room-requests.index') }}">Reset</a>
+                @endif
             </form>
-            @if ($canCreateRoomRequest)
-                <a class="btn btn-primary" href="{{ route('room-requests.create') }}">Ajukan Ruangan</a>
-            @endif
+            <div class="actions">
+                @if ($canViewRoomRequestHistory)
+                    <a class="btn btn-soft" href="{{ route('room-request-history.index') }}">Riwayat Pengajuan Ruang</a>
+                @endif
+                @if ($canCreateRoomRequest)
+                    <a class="btn btn-primary" href="{{ route('room-requests.create') }}">Ajukan Ruangan</a>
+                @endif
+            </div>
         </div>
         <div class="table-wrap">
             <table>

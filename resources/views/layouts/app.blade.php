@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Dashboard') - KuliahSpace</title>
+    <script>
+        try {
+            if (localStorage.getItem('kuliahspace.sidebar') === 'collapsed') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (error) {}
+    </script>
     <style>
         :root {
             --bg: #f6f8fb;
@@ -40,21 +47,45 @@
             display: grid;
             grid-template-columns: 260px minmax(0, 1fr);
             min-height: 100vh;
+            transition: grid-template-columns .2s ease;
+        }
+        .sidebar-collapsed .app-shell {
+            grid-template-columns: 78px minmax(0, 1fr);
         }
         .sidebar {
             background: #111827;
             color: #e5edf6;
             padding: 22px 16px;
+            overflow: hidden;
+            transition: padding .2s ease;
+        }
+        .sidebar-collapsed .sidebar {
+            padding: 18px 12px;
+        }
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-bottom: 18px;
         }
         .brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 10px 22px;
+            min-width: 0;
+            padding: 8px 0;
             font-weight: 800;
             font-size: 20px;
         }
+        .brand-text,
+        .nav-label,
+        .nav-section {
+            transition: opacity .16s ease, width .16s ease;
+            white-space: nowrap;
+        }
         .brand-mark {
+            flex: 0 0 auto;
             display: grid;
             place-items: center;
             width: 34px;
@@ -63,6 +94,42 @@
             background: #dff2e6;
             color: #174331;
             font-weight: 900;
+        }
+        .sidebar-toggle {
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .06);
+            color: #e5edf6;
+            cursor: pointer;
+            font-weight: 900;
+        }
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, .1);
+        }
+        .sidebar-collapsed .sidebar-header {
+            flex-direction: column;
+            justify-content: center;
+        }
+        .sidebar-collapsed .brand {
+            justify-content: center;
+            gap: 0;
+        }
+        .sidebar-collapsed .brand-text,
+        .sidebar-collapsed .nav-label,
+        .sidebar-collapsed .nav-section {
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .sidebar-collapsed .nav-section {
+            height: 0;
+            margin: 8px 0;
+            padding: 0;
         }
         .nav-section {
             margin: 18px 0 8px;
@@ -81,6 +148,11 @@
             color: #cbd5e1;
             margin-bottom: 4px;
         }
+        .sidebar-collapsed .nav-link {
+            justify-content: center;
+            gap: 0;
+            padding: 10px;
+        }
         .nav-link:hover,
         .nav-link.active {
             background: rgba(255, 255, 255, .08);
@@ -95,6 +167,10 @@
             background: rgba(255, 255, 255, .08);
             font-size: 12px;
             font-weight: 800;
+        }
+        .sidebar-collapsed .nav-icon {
+            width: 30px;
+            height: 30px;
         }
 
         .main-shell { min-width: 0; }
@@ -292,8 +368,35 @@
         }
 
         @media (max-width: 980px) {
-            .app-shell { grid-template-columns: 1fr; }
+            .app-shell,
+            .sidebar-collapsed .app-shell { grid-template-columns: 1fr; }
             .sidebar { position: static; }
+            .sidebar-collapsed .sidebar { padding: 18px; }
+            .sidebar-collapsed .brand-text,
+            .sidebar-collapsed .nav-label,
+            .sidebar-collapsed .nav-section {
+                width: auto;
+                opacity: 1;
+                overflow: visible;
+            }
+            .sidebar-collapsed .sidebar-header {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .sidebar-collapsed .brand {
+                justify-content: flex-start;
+                gap: 10px;
+            }
+            .sidebar-collapsed .nav-section {
+                height: auto;
+                margin: 18px 0 8px;
+                padding: 0 10px;
+            }
+            .sidebar-collapsed .nav-link {
+                justify-content: flex-start;
+                gap: 10px;
+                padding: 10px 12px;
+            }
             .grid-4, .grid-3, .grid-2, .form-grid { grid-template-columns: 1fr; }
             .content, .topbar { padding-left: 18px; padding-right: 18px; }
             .topbar { align-items: flex-start; flex-direction: column; }
@@ -301,6 +404,7 @@
             .detail-list { grid-template-columns: 1fr; }
         }
     </style>
+    @stack('styles')
 </head>
 <body>
 <div class="app-shell">
@@ -327,5 +431,38 @@
         </section>
     </main>
 </div>
+@stack('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toggle = document.querySelector('[data-sidebar-toggle]');
+        var toggleIcon = document.querySelector('[data-sidebar-toggle-icon]');
+        var root = document.documentElement;
+
+        if (! toggle) {
+            return;
+        }
+
+        function setCollapsed(collapsed) {
+            root.classList.toggle('sidebar-collapsed', collapsed);
+            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            toggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
+            toggle.setAttribute('title', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
+
+            if (toggleIcon) {
+                toggleIcon.textContent = collapsed ? '>>' : '<<';
+            }
+
+            try {
+                localStorage.setItem('kuliahspace.sidebar', collapsed ? 'collapsed' : 'expanded');
+            } catch (error) {}
+        }
+
+        setCollapsed(root.classList.contains('sidebar-collapsed'));
+
+        toggle.addEventListener('click', function () {
+            setCollapsed(! root.classList.contains('sidebar-collapsed'));
+        });
+    });
+</script>
 </body>
 </html>

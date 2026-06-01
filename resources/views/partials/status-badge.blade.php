@@ -1,6 +1,6 @@
 @php
     $value = is_bool($status ?? null) ? (($status ?? false) ? 'active' : 'inactive') : strtolower((string) ($status ?? 'inactive'));
-    $label = $label ?? match ($value) {
+    $badgeLabel = $badgeLabel ?? match ($value) {
         'active' => 'Aktif',
         'inactive' => 'Nonaktif',
         'pending' => 'Pending',
@@ -15,4 +15,4 @@
     };
 @endphp
 
-<span class="status status-{{ $value }}">{{ $label }}</span>
+<span class="status status-{{ $value }}">{{ $badgeLabel }}</span>

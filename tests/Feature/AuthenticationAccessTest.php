@@ -38,12 +38,14 @@ class AuthenticationAccessTest extends TestCase
         $this->post(route('login.store'), [
             'email' => 'dosen@ulm.ac.id',
             'password' => 'password',
-        ])->assertRedirect(route('schedules.index'));
+        ])->assertRedirect(route('room-availability.index'));
 
         $this->get(route('schedules.index'))->assertOk();
         $this->get(route('room-availability.index'))->assertOk();
+        $this->get(route('room-search.index'))->assertOk();
         $this->get(route('class-leaders.index'))->assertOk();
         $this->get(route('room-requests.create'))->assertOk();
+        $this->get(route('room-request-history.index'))->assertForbidden();
         $this->get(route('rooms.index'))->assertForbidden();
     }
 
@@ -52,12 +54,14 @@ class AuthenticationAccessTest extends TestCase
         $this->post(route('login.store'), [
             'email' => 'ketuakelas@ulm.ac.id',
             'password' => 'password',
-        ])->assertRedirect(route('schedules.index'));
+        ])->assertRedirect(route('room-availability.index'));
 
         $this->get(route('schedules.index'))->assertOk();
         $this->get(route('room-requests.index'))->assertOk();
         $this->get(route('room-requests.create'))->assertOk();
         $this->get(route('room-availability.index'))->assertOk();
+        $this->get(route('room-search.index'))->assertOk();
+        $this->get(route('room-request-history.index'))->assertForbidden();
     }
 
     public function test_mahasiswa_access_is_limited_to_schedules_and_room_availability(): void
@@ -65,10 +69,12 @@ class AuthenticationAccessTest extends TestCase
         $this->post(route('login.store'), [
             'email' => 'mahasiswa@ulm.ac.id',
             'password' => 'password',
-        ])->assertRedirect(route('schedules.index'));
+        ])->assertRedirect(route('room-availability.index'));
 
         $this->get(route('schedules.index'))->assertOk();
         $this->get(route('room-availability.index'))->assertOk();
+        $this->get(route('room-search.index'))->assertOk();
+        $this->get(route('room-request-history.index'))->assertForbidden();
         $this->get(route('room-requests.index'))->assertForbidden();
         $this->get(route('room-requests.create'))->assertForbidden();
         $this->post(route('room-requests.store'), [])->assertForbidden();

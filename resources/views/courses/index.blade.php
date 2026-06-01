@@ -47,5 +47,21 @@
             </table>
         </div>
     </div>
-    <div class="pagination">{{ $courses->links() }}</div>
+    @if ($courses->hasPages())
+        <div class="pagination">
+            @if ($courses->onFirstPage())
+                <span class="btn btn-small btn-soft" aria-disabled="true">Sebelumnya</span>
+            @else
+                <a class="btn btn-small btn-soft" href="{{ $courses->previousPageUrl() }}">Sebelumnya</a>
+            @endif
+
+            <span class="muted">Halaman {{ $courses->currentPage() }} dari {{ $courses->lastPage() }}</span>
+
+            @if ($courses->hasMorePages())
+                <a class="btn btn-small btn-soft" href="{{ $courses->nextPageUrl() }}">Berikutnya</a>
+            @else
+                <span class="btn btn-small btn-soft" aria-disabled="true">Berikutnya</span>
+            @endif
+        </div>
+    @endif
 @endsection

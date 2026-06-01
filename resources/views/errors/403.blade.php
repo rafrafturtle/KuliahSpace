@@ -9,7 +9,7 @@
             <h2 style="margin-top: 0;">Akses tidak tersedia</h2>
             <p class="muted">Silakan gunakan menu yang tersedia untuk role akun Anda.</p>
             <div class="actions" style="margin-top: 18px;">
-                <a class="btn btn-primary" href="{{ auth()->user()?->isAn('admin') ? route('dashboard') : route('schedules.index') }}">Kembali</a>
+                <a class="btn btn-primary" href="{{ auth()->user()?->isAn('admin') ? route('dashboard') : route('room-availability.index') }}">Kembali</a>
             </div>
         </div>
     </div>

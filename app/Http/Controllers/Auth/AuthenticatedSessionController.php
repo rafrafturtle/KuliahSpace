@@ -50,6 +50,6 @@ class AuthenticatedSessionController extends Controller
 
     private function homeRouteFor($user): string
     {
-        return $user->isAn('admin') ? 'dashboard' : 'schedules.index';
+        return $user->isAn('admin') ? 'dashboard' : 'room-availability.index';
     }
 }

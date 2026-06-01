@@ -20,7 +20,7 @@
                     <dt>Role</dt>
                     <dd>
                         @forelse ($user->roles as $role)
-                            @include('partials.status-badge', ['status' => 'active', 'label' => $role->title ?? str($role->name)->headline()])
+                            @include('partials.status-badge', ['status' => 'active', 'badgeLabel' => $role->title ?? str($role->name)->headline()])
                         @empty
                             <span class="muted">Belum ada role</span>
                         @endforelse

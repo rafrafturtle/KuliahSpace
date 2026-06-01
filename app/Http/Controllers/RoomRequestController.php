@@ -21,9 +21,9 @@ class RoomRequestController extends Controller
     public function index(Request $request): View
     {
         $search = $request->string('search')->toString();
-        $status = $request->string('status')->toString();
 
         $roomRequests = RoomRequest::with(['requester', 'room', 'approver'])
+            ->where('status', RoomRequest::STATUS_PENDING)
             ->when(! $this->currentUserIsAdmin(), fn ($query) => $query->where('requester_id', $request->user()->id))
             ->when($search, function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
@@ -32,7 +32,6 @@ class RoomRequestController extends Controller
                         ->orWhereHas('room', fn ($query) => $query->where('code', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%"));
                 });
             })
-            ->when(in_array($status, RoomRequest::STATUSES, true), fn ($query) => $query->where('status', $status))
             ->latest('request_date')
             ->paginate(10)
             ->withQueryString();
@@ -40,8 +39,8 @@ class RoomRequestController extends Controller
         return view('room-requests.index', [
             'roomRequests' => $roomRequests,
             'search' => $search,
-            'status' => $status,
             'canCreateRoomRequest' => $this->canCreateRoomRequest(),
+            'canViewRoomRequestHistory' => $this->currentUserIsAdmin(),
         ]);
     }
 
@@ -151,8 +150,8 @@ class RoomRequestController extends Controller
         $roomRequest->update([
             'status' => RoomRequest::STATUS_REJECTED,
             'admin_note' => $validated['admin_note'] ?? null,
-            'approved_by' => null,
-            'approved_at' => null,
+            'approved_by' => request()->user()->id,
+            'approved_at' => now(),
         ]);
 
         return redirect()->route('room-requests.show', $roomRequest)->with('success', 'Permintaan ruangan ditolak.');

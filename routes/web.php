@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoomAvailabilityController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomRequestController;
+use App\Http\Controllers\RoomRequestHistoryController;
+use App\Http\Controllers\RoomSearchController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleController;
@@ -19,7 +21,7 @@ Route::get('/', function () {
         return redirect()->route('login');
     }
 
-    return redirect()->route(auth()->user()->isAn('admin') ? 'dashboard' : 'schedules.index');
+    return redirect()->route(auth()->user()->isAn('admin') ? 'dashboard' : 'room-availability.index');
 });
 
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -53,9 +55,26 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/room-availability', [RoomAvailabilityController::class, 'index'])
         ->middleware('role:admin,dosen,ketua_kelas,mahasiswa')
         ->name('room-availability.index');
+    Route::get('/room-availability/date/{date}', [RoomAvailabilityController::class, 'dateDetail'])
+        ->where('date', '\d{4}-\d{2}-\d{2}')
+        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa')
+        ->name('room-availability.date');
     Route::post('/room-availability/check', [RoomAvailabilityController::class, 'check'])
         ->middleware('role:admin,dosen,ketua_kelas,mahasiswa')
         ->name('room-availability.check');
+    Route::get('/room-search', [RoomSearchController::class, 'index'])
+        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa')
+        ->name('room-search.index');
+
+    Route::get('/room-request-history', [RoomRequestHistoryController::class, 'index'])
+        ->middleware('role:admin')
+        ->name('room-request-history.index');
+    Route::get('/room-request-history/export-excel', [RoomRequestHistoryController::class, 'exportExcel'])
+        ->middleware('role:admin')
+        ->name('room-request-history.export-excel');
+    Route::get('/room-request-history/export-pdf', [RoomRequestHistoryController::class, 'exportPdf'])
+        ->middleware('role:admin')
+        ->name('room-request-history.export-pdf');
 
     Route::get('/room-requests/create', [RoomRequestController::class, 'create'])
         ->middleware('role:admin,dosen,ketua_kelas')

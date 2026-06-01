@@ -42,13 +42,9 @@
         <select id="day_of_week" name="day_of_week" required>
             <option value="">Pilih hari</option>
             @foreach ($days as $day)
-                <option value="{{ $day }}" @selected(old('day_of_week', $schedule->day_of_week) === $day)>{{ $day }}</option>
+                <option value="{{ $day }}" @selected(old('day_of_week', $schedule->day_of_week) === $day)>{{ $dayLabels[$day] ?? $day }}</option>
             @endforeach
         </select>
-    </div>
-    <div class="form-field">
-        <label for="week_number">Minggu Ke</label>
-        <input id="week_number" name="week_number" type="number" min="1" value="{{ old('week_number', $schedule->week_number) }}">
     </div>
     <div class="form-field">
         <label for="start_time">Mulai</label>

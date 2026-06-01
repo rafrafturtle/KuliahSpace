@@ -179,6 +179,12 @@ class DatabaseSeeder extends Seeder
             ]);
 
             Bouncer::assign('ketua_kelas')->to($students[1]);
+
+            $this->call([
+                RoomSeeder::class,
+                ClassScheduleSeeder::class,
+            ]);
+
             Bouncer::refresh();
         });
     }
