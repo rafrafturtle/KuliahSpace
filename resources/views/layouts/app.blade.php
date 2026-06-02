@@ -58,9 +58,25 @@
             background: #111827;
             color: #e5edf6;
             padding: 22px 16px;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             transition: padding .2s ease;
-            position: relative;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,.18);
+            border-radius: 999px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         .resize-handle {
