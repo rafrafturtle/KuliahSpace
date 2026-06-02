@@ -45,20 +45,38 @@
 
         .app-shell {
             display: grid;
-            grid-template-columns: 260px minmax(0, 1fr);
+            grid-template-columns: var(--sidebar-width, 260px) minmax(0, 1fr);
             min-height: 100vh;
             transition: grid-template-columns .2s ease;
         }
+
         .sidebar-collapsed .app-shell {
             grid-template-columns: 78px minmax(0, 1fr);
         }
+
         .sidebar {
             background: #111827;
             color: #e5edf6;
             padding: 22px 16px;
             overflow: hidden;
             transition: padding .2s ease;
+            position: relative;
         }
+
+        .resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            cursor: ew-resize;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .resize-handle:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
         .sidebar-collapsed .sidebar {
             padding: 18px 12px;
         }
@@ -432,37 +450,90 @@
     </main>
 </div>
 @stack('scripts')
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var toggle = document.querySelector('[data-sidebar-toggle]');
-        var toggleIcon = document.querySelector('[data-sidebar-toggle-icon]');
-        var root = document.documentElement;
+document.addEventListener('DOMContentLoaded', function () {
+    const root = document.documentElement;
+    const handle = document.getElementById('resizeHandle');
 
-        if (! toggle) {
-            return;
-        }
+    let isResizing = false;
 
-        function setCollapsed(collapsed) {
-            root.classList.toggle('sidebar-collapsed', collapsed);
-            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            toggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
-            toggle.setAttribute('title', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
-
-            if (toggleIcon) {
-                toggleIcon.textContent = collapsed ? '>>' : '<<';
-            }
-
-            try {
-                localStorage.setItem('kuliahspace.sidebar', collapsed ? 'collapsed' : 'expanded');
-            } catch (error) {}
-        }
-
-        setCollapsed(root.classList.contains('sidebar-collapsed'));
-
-        toggle.addEventListener('click', function () {
-            setCollapsed(! root.classList.contains('sidebar-collapsed'));
+    // Resize sidebar
+    if (handle) {
+        handle.addEventListener('mousedown', function () {
+            isResizing = true;
+            document.body.style.cursor = 'ew-resize';
         });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isResizing) return;
+
+            let width = e.clientX;
+
+            if (width >= 78 && width <= 450) {
+                root.style.setProperty('--sidebar-width', width + 'px');
+
+                if (width <= 120) {
+                    root.classList.add('sidebar-collapsed');
+                } else {
+                    root.classList.remove('sidebar-collapsed');
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', function () {
+            isResizing = false;
+            document.body.style.cursor = '';
+        });
+    }
+
+    // Tombol collapse sidebar
+    var toggle = document.querySelector('[data-sidebar-toggle]');
+    var toggleIcon = document.querySelector('[data-sidebar-toggle-icon]');
+
+    if (!toggle) return;
+
+    function setCollapsed(collapsed) {
+        root.classList.toggle('sidebar-collapsed', collapsed);
+
+        toggle.setAttribute(
+            'aria-expanded',
+            collapsed ? 'false' : 'true'
+        );
+
+        toggle.setAttribute(
+            'aria-label',
+            collapsed ? 'Expand sidebar' : 'Minimize sidebar'
+        );
+
+        toggle.setAttribute(
+            'title',
+            collapsed ? 'Buka sidebar' : 'Tutup sidebar'
+        );
+
+        if (toggleIcon) {
+            toggleIcon.textContent = collapsed ? '>>' : '<<';
+        }
+
+        try {
+            localStorage.setItem(
+                'kuliahspace.sidebar',
+                collapsed ? 'collapsed' : 'expanded'
+            );
+        } catch (error) {}
+    }
+
+    setCollapsed(
+        root.classList.contains('sidebar-collapsed')
+    );
+
+    toggle.addEventListener('click', function () {
+        setCollapsed(
+            !root.classList.contains('sidebar-collapsed')
+        );
     });
+});
 </script>
+
 </body>
 </html>

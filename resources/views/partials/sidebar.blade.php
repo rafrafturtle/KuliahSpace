@@ -49,4 +49,5 @@
             @endforeach
         @endif
     @endforeach
+    <div id="resizeHandle" class="resize-handle"></div>
 </aside>
