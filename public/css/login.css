@@ -476,35 +476,27 @@ button {
 
 @media (max-width: 1200px) {
     .login-page {
-        grid-template-columns: 1fr;
+        display: block;
+        min-height: 100vh;
         background: linear-gradient(135deg, #06256b, #0d55bf);
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
-    .right-panel {
-        padding: 20px 30px 50px;
-    }
-
-    .login-card {
-        margin-top: 10px;
-    }
-}
-
-@media (max-width: 768px) {
     .left-panel {
-        padding: 28px 22px;
+        padding: 28px 22px 18px;
         text-align: center;
     }
 
     .brand {
         flex-direction: column;
-        text-align: center;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .brand img {
-        width: 105px;
-        height: 105px;
+        width: 95px;
+        height: 95px;
     }
 
     .brand h1 {
@@ -512,31 +504,47 @@ button {
     }
 
     .brand p {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .hero {
-        margin: 34px auto 0;
+        margin: 28px auto 0;
+        max-width: 620px;
     }
 
     .hero h2 {
-        font-size: 33px;
+        font-size: 34px;
+    }
+
+    .hero p {
+        margin-top: 18px;
+        font-size: 15px;
+    }
+
+    .features,
+    .secure-card,
+    .login-card {
+        width: min(100%, 850px);
+        max-width: 850px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .features {
-        grid-template-columns: 1fr;
-        gap: 18px;
-        padding: 24px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+        padding: 20px;
     }
 
     .feature {
-        border-right: 0;
-        border-bottom: 1px solid #d3e0f2;
-        padding-bottom: 18px;
+        border-right: 1px solid #d3e0f2;
+        border-bottom: none;
+        padding: 0 12px;
     }
 
     .feature:last-child {
-        border-bottom: 0;
+        border-right: none;
     }
 
     .feature h3 {
@@ -544,12 +552,14 @@ button {
     }
 
     .feature p {
-        max-width: 270px;
+        max-width: 160px;
     }
 
     .secure-card {
         grid-template-columns: 1fr;
         text-align: center;
+        padding: 18px 22px;
+        min-height: auto;
     }
 
     .secure-icon {
@@ -561,44 +571,98 @@ button {
     }
 
     .right-panel {
-        padding: 20px;
+        display: block;
+        padding: 18px 22px 34px;
     }
 
     .login-card {
-        width: 100%;
         padding: 28px 24px;
-    }
-
-    .demo-box {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .demo-title {
-        border-right: 0;
-        border-bottom: 1px solid #c7d8f5;
-        padding: 0 0 18px;
-        justify-content: center;
-    }
-
-    .demo-list {
-        padding-left: 0;
-        margin-top: 0;
-    }
-
-    .demo-list p {
-        grid-template-columns: 100px 12px 1fr;
-        white-space: normal;
     }
 }
 
-@media (max-width: 420px) {
-    .login-title h2 {
-        font-size: 29px;
+@media (max-width: 600px) {
+    .left-panel {
+        padding: 24px 14px 16px;
+    }
+
+    .brand img {
+        width: 85px;
+        height: 85px;
+    }
+
+    .brand h1 {
+        font-size: 36px;
+    }
+
+    .brand p {
+        font-size: 14px;
+    }
+
+    .hero {
+        margin-top: 24px;
     }
 
     .hero h2 {
         font-size: 29px;
+        line-height: 1.2;
+    }
+
+    .hero p {
+        font-size: 13.5px;
+        line-height: 1.65;
+    }
+
+    .features {
+        width: min(100%, 700px);
+        max-width: 700px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 18px;
+        border-radius: 24px;
+    }
+
+    .feature {
+        border-right: none;
+        border-bottom: 1px solid #d3e0f2;
+        padding: 18px 10px;
+    }
+
+    .feature:last-child {
+        border-bottom: none;
+    }
+
+    .secure-card {
+        width: min(100%, 700px);
+        max-width: 700px;
+        min-height: auto;
+        padding: 22px 18px;
+        border-radius: 24px;
+    }
+
+    .right-panel {
+        padding: 16px 14px 28px;
+    }
+
+    .login-card {
+        width: min(100%, 700px);
+        max-width: 700px;
+        padding: 26px 20px;
+        border-radius: 28px;
+    }
+
+    .login-logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .login-title h2 {
+        font-size: 30px;
+    }
+
+    .login-title p {
+        font-size: 14px;
+        margin-bottom: 20px;
     }
 
     .form-row {
@@ -607,13 +671,129 @@ button {
         gap: 10px;
     }
 
-    .login-logo {
-        width: 105px;
-        height: 105px;
+    .demo-box {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 18px;
+    }
+
+    .demo-title {
+        padding: 0 0 18px;
+        border-right: none;
+        border-bottom: 1px solid #c7d8f5;
+        justify-content: center;
+        text-align: left;
+    }
+
+    .demo-title h3 {
+        font-size: 24px;
+        line-height: 1.15;
+    }
+
+    .demo-list {
+        padding-left: 0;
     }
 
     .demo-list p {
-        grid-template-columns: 92px 10px 1fr;
-        font-size: 13.5px;
+        display: grid;
+        grid-template-columns: 100px 10px minmax(0, 1fr);
+        gap: 0;
+        white-space: normal;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .demo-list p span:last-child {
+        word-break: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 420px) {
+    .left-panel {
+        padding: 22px 10px 14px;
+    }
+
+    .brand h1 {
+        font-size: 32px;
+    }
+
+    .brand p {
+        font-size: 13px;
+    }
+
+    .hero h2 {
+        font-size: 25px;
+    }
+
+    .hero p {
+        font-size: 12.5px;
+    }
+
+    .right-panel {
+        padding: 14px 8px 24px;
+    }
+
+    .login-card {
+        padding: 24px 16px;
+        border-radius: 24px;
+    }
+
+    .login-title h2 {
+        font-size: 27px;
+    }
+
+    .input-group {
+        height: 52px;
+        padding: 0 13px;
+    }
+
+    button {
+        height: 54px;
+        font-size: 16px;
+    }
+
+    .demo-box {
+        padding: 16px 14px;
+    }
+
+    .demo-title {
+        gap: 10px;
+    }
+
+    .demo-icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .demo-icon span {
+        font-size: 32px;
+    }
+
+    .demo-title h3 {
+        font-size: 21px;
+    }
+
+    .demo-list p {
+        grid-template-columns: 82px 8px minmax(0, 1fr);
+        font-size: 12px;
+    }
+
+    .safe-text {
+        font-size: 11px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 360px) {
+    .demo-list p {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        font-size: 12px;
+    }
+
+    .demo-list p span:nth-child(2) {
+        display: none;
     }
 }

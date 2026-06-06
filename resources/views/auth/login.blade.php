@@ -24,9 +24,9 @@
             <div class="hero-line"></div>
             <h2>Manajemen Kelas<br>Lebih Mudah,<br>Terstruktur, dan Efisien.</h2>
             <p>
-                KuliahSpace membantu dosen, ketua kelas, PJ, dan mahasiswa
-                mengelola kelas, jadwal, tugas, ruang, serta informasi akademik
-                dengan lebih terorganisir.
+                KuliahSpace membantu dosen, ketua kelas, dan mahasiswa
+                mengelola kelas, jadwal perkuliahan, penggunaan ruangan,
+                serta aktivitas perkuliahan dengan lebih terorganisir.
             </p>
         </div>
 
