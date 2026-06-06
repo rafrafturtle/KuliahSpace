@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\RoomRequest;
 use App\Models\Semester;
 use App\Services\RoomAvailabilityService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -32,6 +33,39 @@ class DashboardController extends Controller
             ])->count();
         }
 
+        $monthlyRoomRequests = RoomRequest::select(
+                DB::raw('MONTH(request_date) as month'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('request_date', now()->year)
+            ->groupBy(DB::raw('MONTH(request_date)'))
+            ->orderBy(DB::raw('MONTH(request_date)'))
+            ->pluck('total', 'month')
+            ->toArray();
+
+        $monthlyRequestData = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyRequestData[] = $monthlyRoomRequests[$i] ?? 0;
+        }
+
+        $statusRequestData = [
+            RoomRequest::where('status', RoomRequest::STATUS_APPROVED)->count(),
+            RoomRequest::where('status', RoomRequest::STATUS_PENDING)->count(),
+            RoomRequest::where('status', RoomRequest::STATUS_REJECTED)->count(),
+            RoomRequest::where('status', RoomRequest::STATUS_CANCELLED)->count(),
+        ];
+
+        $topRooms = RoomRequest::select(
+                'room_id',
+                DB::raw('COUNT(*) as total')
+            )
+            ->with('room')
+            ->groupBy('room_id')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
         return view('dashboard.index', [
             'totalActiveRooms' => Room::where('is_active', true)->count(),
             'totalActiveSchedules' => ClassSchedule::where('is_active', true)->count(),
@@ -44,6 +78,9 @@ class DashboardController extends Controller
                 ->get(),
             'activeSemester' => $activeSemester,
             'activeAcademicYear' => $activeAcademicYear,
+            'monthlyRequestData' => $monthlyRequestData,
+            'statusRequestData' => $statusRequestData,
+            'topRooms' => $topRooms,
         ]);
     }
 }
