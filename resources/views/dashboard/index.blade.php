@@ -6,30 +6,45 @@
 @section('content')
     <div class="grid grid-4">
         <div class="bento-card">
-            <h2>Ruang Aktif</h2>
+            <div class="actions" style="justify-content: space-between;">
+                <h2>Ruang Aktif</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#e8f3ff;color:#0b60eb;">meeting_room</span>
+            </div>
             <div class="metric">{{ $totalActiveRooms }}</div>
             <div class="muted">Ruangan siap digunakan</div>
         </div>
         <div class="bento-card">
-            <h2>Jadwal Aktif</h2>
+            <div class="actions" style="justify-content: space-between;">
+                <h2>Jadwal Aktif</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#e8f3ff;color:#0b60eb;">calendar_month</span>
+            </div>
             <div class="metric">{{ $totalActiveSchedules }}</div>
             <div class="muted">Perkuliahan terjadwal</div>
         </div>
         <div class="bento-card">
-            <h2>Request Pending</h2>
+            <div class="actions" style="justify-content: space-between;">
+                <h2>Request Pending</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#fff7df;color:#b77905;">pending_actions</span>
+            </div>
             <div class="metric">{{ $pendingRoomRequests }}</div>
             <div class="muted">Menunggu keputusan admin</div>
         </div>
         <div class="bento-card">
-            <h2>Request Disetujui</h2>
+            <div class="actions" style="justify-content: space-between;">
+                <h2>Request Disetujui</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#e8f8f1;color:#0f8f65;">task_alt</span>
+            </div>
             <div class="metric">{{ $approvedRoomRequests }}</div>
             <div class="muted">Permintaan yang sudah final</div>
         </div>
     </div>
 
-    <div class="grid grid-2" style="margin-top: 16px;">
+    <div class="grid grid-2" style="margin-top: 18px;">
         <div class="bento-card">
-            <h2>Ruang Tersedia Hari Ini</h2>
+            <div class="actions" style="justify-content: space-between;">
+                <h2>Ruang Tersedia Hari Ini</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#e8f8f1;color:#0f8f65;">event_seat</span>
+            </div>
             <div class="metric">{{ $availableRoomsToday }}</div>
             <div class="muted">
                 Berdasarkan {{ $activeSemester?->name ?? 'semester aktif belum ada' }} dan
@@ -40,7 +55,10 @@
         <div class="panel">
             <div class="panel-header">
                 <h2>Permintaan Terbaru</h2>
-                <a class="btn btn-small btn-soft" href="{{ route('room-requests.index') }}">Lihat semua</a>
+                <a class="btn btn-small btn-soft" href="{{ route('room-requests.index') }}">
+                    <span class="material-symbols-rounded" style="font-size: 18px;">visibility</span>
+                    Lihat semua
+                </a>
             </div>
             <div class="table-wrap">
                 <table>
