@@ -234,6 +234,40 @@
         background: linear-gradient(90deg, #2563eb, #38bdf8);
     }
 
+    html.dark .top-room-item {
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+}
+
+html.dark .top-room-item strong {
+    color: #f8fafc !important;
+}
+
+html.dark .top-room-item .muted {
+    color: #94a3b8 !important;
+}
+
+html.dark .top-room-rank {
+    background: #172554 !important;
+    color: #60a5fa !important;
+}
+
+html.dark .top-room-right {
+    color: #f8fafc !important;
+}
+
+html.dark .top-room-bar {
+    background: #334155 !important;
+}
+
+html.dark .top-room-progress {
+    background: linear-gradient(
+        90deg,
+        #3b82f6,
+        #38bdf8
+    ) !important;
+}
+
     @media (max-width: 768px) {
         .top-room-item {
             align-items: flex-start;
