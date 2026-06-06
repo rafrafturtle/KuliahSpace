@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\Building;
 use App\Models\ClassSchedule;
 use App\Models\Room;
 use App\Models\RoomRequest;
@@ -33,6 +34,7 @@ class DashboardController extends Controller
         }
 
         return view('dashboard.index', [
+            'totalActiveBuildings' => Building::where('is_active', true)->count(),
             'totalActiveRooms' => Room::where('is_active', true)->count(),
             'totalActiveSchedules' => ClassSchedule::where('is_active', true)->count(),
             'pendingRoomRequests' => RoomRequest::where('status', RoomRequest::STATUS_PENDING)->count(),

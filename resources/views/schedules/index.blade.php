@@ -133,7 +133,8 @@
                                         @include('partials.status-badge', ['status' => 'available', 'badgeLabel' => 'Tersedia'])
                                     </div>
                                     <div class="room-card-meta">
-                                        <span>Gedung: {{ $room->building ?? '-' }}</span>
+                                        <span>Gedung: {{ $room->buildingRecord?->name ?? $room->building ?? '-' }}</span>
+                                        <span>Lantai: {{ $room->buildingRecord?->floor ?? '-' }}</span>
                                         <span>Kapasitas: {{ $room->capacity }}</span>
                                         <span>Fasilitas: {{ $room->facilities ?? '-' }}</span>
                                     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Building;
 use App\Models\ClassSchedule;
 use App\Models\Room;
 use App\Models\RoomRequest;
@@ -122,11 +123,11 @@ class RoomAvailabilityService
      */
     public function getAvailableRooms(array $criteria, bool $includePending = true): Collection
     {
-        $rooms = Room::query()
-            ->where('is_active', true)
-            ->when(! empty($criteria['capacity']), fn ($query) => $query->where('capacity', '>=', (int) $criteria['capacity']))
-            ->orderBy('code')
-            ->get();
+        $rooms = $this->activeRoomQuery(
+            $criteria['capacity'] ?? null,
+            $criteria['building'] ?? null,
+            $criteria['building_id'] ?? null
+        )->get();
 
         $requestDate = $criteria['request_date'] ?? $criteria['date'] ?? null;
 
@@ -160,11 +161,12 @@ class RoomAvailabilityService
         ?string $semesterId = null,
         ?string $academicYearId = null,
         int|string|null $capacity = null,
-        ?string $building = null
+        ?string $building = null,
+        ?string $buildingId = null
     ): array {
         $dayOfWeek = Carbon::parse($date)->format('l');
         $hasTimeRange = filled($startTime) && filled($endTime);
-        $rooms = $this->activeRoomQuery($capacity, $building)->get()->keyBy('id');
+        $rooms = $this->activeRoomQuery($capacity, $building, $buildingId)->get()->keyBy('id');
         $roomIds = $rooms->keys()->all();
 
         if ($rooms->isEmpty()) {
@@ -286,7 +288,8 @@ class RoomAvailabilityService
         ?string $semesterId = null,
         ?string $academicYearId = null,
         int|string|null $capacity = null,
-        ?string $building = null
+        ?string $building = null,
+        ?string $buildingId = null
     ): array {
         $dayOfWeek = Carbon::parse($date)->format('l');
         $hasTimeFilter = filled($startTime) && filled($endTime);
@@ -295,7 +298,7 @@ class RoomAvailabilityService
         $rangeStart = $this->timeToMinutes($rangeStartTime);
         $rangeEnd = $this->timeToMinutes($rangeEndTime);
 
-        $rooms = $this->activeRoomQuery($capacity, $building)->get();
+        $rooms = $this->activeRoomQuery($capacity, $building, $buildingId)->get();
         $roomIds = $rooms->pluck('id')->all();
 
         if ($rooms->isEmpty() || $rangeStart >= $rangeEnd) {
@@ -369,6 +372,142 @@ class RoomAvailabilityService
         ];
     }
 
+    /**
+     * @return array{
+     *     buildings:Collection<int, array<string, mixed>>,
+     *     totalBuildings:int,
+     *     totalRooms:int,
+     *     usedRoomCount:int,
+     *     pendingRoomCount:int,
+     *     availableRoomCount:int,
+     *     fullyAvailableRoomCount:int,
+     *     rangeStartTime:string,
+     *     rangeEndTime:string,
+     *     hasTimeFilter:bool
+     * }
+     */
+    public function getBuildingsAvailabilityByDate(
+        string $date,
+        ?string $startTime = null,
+        ?string $endTime = null,
+        ?string $semesterId = null,
+        ?string $academicYearId = null,
+        int|string|null $capacity = null
+    ): array {
+        $timeline = $this->getRoomTimelineByDate(
+            $date,
+            $startTime,
+            $endTime,
+            $semesterId,
+            $academicYearId,
+            $capacity
+        );
+
+        $buildings = $timeline['rooms']
+            ->filter(fn (array $timelineItem): bool => $timelineItem['room']->buildingRecord !== null)
+            ->groupBy(fn (array $timelineItem): string => $timelineItem['room']->building_id)
+            ->map(function (Collection $buildingRooms): array {
+                $building = $buildingRooms->first()['room']->buildingRecord;
+
+                return [
+                    'building' => $building,
+                    'total_rooms' => $buildingRooms->count(),
+                    'used_rooms_count' => $buildingRooms->filter(fn (array $timelineItem): bool => count($timelineItem['used_slots']) > 0)->count(),
+                    'pending_rooms_count' => $buildingRooms->filter(fn (array $timelineItem): bool => count($timelineItem['pending_slots']) > 0)->count(),
+                    'available_rooms_count' => $buildingRooms->filter(fn (array $timelineItem): bool => count($timelineItem['available_slots']) > 0)->count(),
+                    'fully_available_rooms_count' => $buildingRooms->filter(fn (array $timelineItem): bool => $timelineItem['summary_status'] === 'fully_available')->count(),
+                ];
+            })
+            ->sortBy(fn (array $buildingSummary): string => $buildingSummary['building']->name)
+            ->values();
+
+        return [
+            'buildings' => $buildings,
+            'totalBuildings' => $buildings->count(),
+            'totalRooms' => $timeline['totalRooms'],
+            'usedRoomCount' => $timeline['usedRoomCount'],
+            'pendingRoomCount' => $timeline['pendingRoomCount'],
+            'availableRoomCount' => $timeline['availableRoomCount'],
+            'fullyAvailableRoomCount' => $timeline['fullyAvailableRoomCount'],
+            'rangeStartTime' => $timeline['rangeStartTime'],
+            'rangeEndTime' => $timeline['rangeEndTime'],
+            'hasTimeFilter' => $timeline['hasTimeFilter'],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getRoomsAvailabilityByBuilding(
+        string $date,
+        string $buildingId,
+        ?string $startTime = null,
+        ?string $endTime = null,
+        ?string $semesterId = null,
+        ?string $academicYearId = null,
+        int|string|null $capacity = null
+    ): array {
+        $timeline = $this->getRoomTimelineByDate(
+            $date,
+            $startTime,
+            $endTime,
+            $semesterId,
+            $academicYearId,
+            $capacity,
+            null,
+            $buildingId
+        );
+
+        return $timeline + [
+            'building' => Building::find($buildingId),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getRoomTimeline(
+        string $date,
+        string $roomId,
+        ?string $startTime = null,
+        ?string $endTime = null,
+        ?string $semesterId = null,
+        ?string $academicYearId = null,
+        int|string|null $capacity = null
+    ): ?array {
+        $room = $this->activeRoomQuery($capacity)
+            ->whereKey($roomId)
+            ->first();
+
+        if (! $room) {
+            return null;
+        }
+
+        $timeline = $this->getRoomTimelineByDate(
+            $date,
+            $startTime,
+            $endTime,
+            $semesterId,
+            $academicYearId,
+            $capacity,
+            null,
+            $room->building_id
+        );
+        $timelineItem = $timeline['rooms']->first(fn (array $item): bool => $item['room']->id === $room->id);
+
+        if (! $timelineItem) {
+            return null;
+        }
+
+        return [
+            'room' => $timelineItem['room'],
+            'timeline' => $timelineItem,
+            'rangeStartTime' => $timeline['rangeStartTime'],
+            'rangeEndTime' => $timeline['rangeEndTime'],
+            'hasTimeFilter' => $timeline['hasTimeFilter'],
+        ];
+    }
+
     public function getCalendarSummary(int $month, int $year, array $filters = []): Collection
     {
         $startDate = Carbon::create($year, $month, 1)->startOfMonth();
@@ -384,6 +523,7 @@ class RoomAvailabilityService
                     $filters['academic_year_id'] ?? null,
                     $filters['capacity'] ?? null,
                     $filters['building'] ?? null,
+                    $filters['building_id'] ?? null,
                 );
 
                 return [
@@ -396,11 +536,13 @@ class RoomAvailabilityService
             });
     }
 
-    private function activeRoomQuery(int|string|null $capacity = null, ?string $building = null): Builder
+    private function activeRoomQuery(int|string|null $capacity = null, ?string $building = null, ?string $buildingId = null): Builder
     {
         return Room::query()
+            ->with('buildingRecord')
             ->where('is_active', true)
             ->when(filled($capacity), fn (Builder $query) => $query->where('capacity', '>=', (int) $capacity))
+            ->when(filled($buildingId), fn (Builder $query) => $query->where('building_id', $buildingId))
             ->when(filled($building), fn (Builder $query) => $query->where('building', $building))
             ->orderBy('code');
     }
@@ -433,7 +575,7 @@ class RoomAvailabilityService
             $slot = $this->clipSlot($schedule->start_time, $schedule->end_time, $rangeStart, $rangeEnd, [
                 'label' => $schedule->course?->name ?? 'Jadwal Kuliah',
                 'source' => 'Jadwal Tetap',
-                'meta' => $schedule->lecturer?->name,
+                'meta' => collect([$schedule->lecturer?->name, $schedule->class_name])->filter()->implode(' | '),
             ]);
 
             if ($slot) {
@@ -488,15 +630,137 @@ class RoomAvailabilityService
             $rangeStart,
             $rangeEnd
         );
+        $timelineRows = $this->buildTimelineRows($usedSlots, $pendingSlots, $rangeStart, $rangeEnd);
 
         return [
             'room' => $room,
             'used_slots' => $this->formatSlots($usedSlots),
             'pending_slots' => $this->formatSlots($pendingSlots),
             'available_slots' => $this->formatSlots($availableSlots),
+            'timeline_rows' => $this->formatSlots($timelineRows),
             'summary_status' => $this->summaryStatus($usedSlots, $pendingSlots, $availableSlots),
             'has_time_filter' => $hasTimeFilter,
         ];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $usedSlots
+     * @param  array<int, array<string, mixed>>  $pendingSlots
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildTimelineRows(array $usedSlots, array $pendingSlots, int $rangeStart, int $rangeEnd): array
+    {
+        $boundaries = collect([$rangeStart, $rangeEnd])
+            ->merge(collect($usedSlots)->flatMap(fn (array $slot): array => [$slot['start_minutes'], $slot['end_minutes']]))
+            ->merge(collect($pendingSlots)->flatMap(fn (array $slot): array => [$slot['start_minutes'], $slot['end_minutes']]))
+            ->filter(fn (mixed $boundary): bool => is_int($boundary) && $boundary >= $rangeStart && $boundary <= $rangeEnd)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $rows = [];
+
+        for ($index = 0; $index < count($boundaries) - 1; $index++) {
+            $start = $boundaries[$index];
+            $end = $boundaries[$index + 1];
+
+            if ($start >= $end) {
+                continue;
+            }
+
+            $usedSlot = $this->firstOverlappingSlot($usedSlots, $start, $end);
+            $pendingSlot = $this->firstOverlappingSlot($pendingSlots, $start, $end);
+
+            if ($usedSlot) {
+                $rows[] = $this->timelineRowFromSlot($usedSlot, $start, $end, 'Terpakai');
+
+                continue;
+            }
+
+            if ($pendingSlot) {
+                $rows[] = $this->timelineRowFromSlot($pendingSlot, $start, $end, 'Pending');
+
+                continue;
+            }
+
+            $rows[] = [
+                'start_time' => $this->minutesToTime($start),
+                'end_time' => $this->minutesToTime($end),
+                'start_minutes' => $start,
+                'end_minutes' => $end,
+                'label' => 'Tersedia',
+                'source' => null,
+                'meta' => null,
+                'status' => 'Tersedia',
+            ];
+        }
+
+        return $this->mergeTimelineRows($rows);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $slots
+     * @return array<string, mixed>|null
+     */
+    private function firstOverlappingSlot(array $slots, int $start, int $end): ?array
+    {
+        foreach ($slots as $slot) {
+            if ($this->hasOverlapInMinutes($start, $end, $slot['start_minutes'], $slot['end_minutes'])) {
+                return $slot;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $slot
+     * @return array<string, mixed>
+     */
+    private function timelineRowFromSlot(array $slot, int $start, int $end, string $status): array
+    {
+        return [
+            'start_time' => $this->minutesToTime($start),
+            'end_time' => $this->minutesToTime($end),
+            'start_minutes' => $start,
+            'end_minutes' => $end,
+            'label' => $slot['label'] ?? $status,
+            'source' => $slot['source'] ?? null,
+            'meta' => $slot['meta'] ?? null,
+            'status' => $status,
+        ];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function mergeTimelineRows(array $rows): array
+    {
+        $merged = [];
+
+        foreach ($rows as $row) {
+            $lastIndex = count($merged) - 1;
+
+            if (
+                $lastIndex >= 0
+                && $merged[$lastIndex]['end_minutes'] === $row['start_minutes']
+                && $merged[$lastIndex]['status'] === $row['status']
+                && ($merged[$lastIndex]['label'] ?? null) === ($row['label'] ?? null)
+                && ($merged[$lastIndex]['source'] ?? null) === ($row['source'] ?? null)
+                && ($merged[$lastIndex]['meta'] ?? null) === ($row['meta'] ?? null)
+            ) {
+                $merged[$lastIndex]['end_minutes'] = $row['end_minutes'];
+                $merged[$lastIndex]['end_time'] = $row['end_time'];
+
+                continue;
+            }
+
+            $merged[] = $row;
+        }
+
+        return $merged;
     }
 
     /**
@@ -700,7 +964,7 @@ class RoomAvailabilityService
             return 'fully_used';
         }
 
-        if ($pendingSlots !== [] && $usedSlots === []) {
+        if ($pendingSlots !== []) {
             return 'has_pending';
         }
 

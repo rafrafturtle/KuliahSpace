@@ -15,7 +15,7 @@
         <div>
             <h3>{{ $room->code }} - {{ $room->name }}</h3>
             <div class="timeline-room-meta">
-                <span>{{ $room->building ?? 'Gedung belum diisi' }}{{ $room->floor ? ' | Lantai '.$room->floor : '' }}</span>
+                <span>{{ $room->buildingRecord?->name ?? $room->building ?? 'Gedung belum diisi' }}{{ $room->buildingRecord?->floor ? ' | Lantai '.$room->buildingRecord->floor : '' }}</span>
                 <span>Kapasitas {{ $room->capacity }}</span>
             </div>
         </div>

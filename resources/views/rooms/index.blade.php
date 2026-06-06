@@ -18,8 +18,10 @@
                 <tr>
                     <th>Kode</th>
                     <th>Nama</th>
-                    <th>Lokasi</th>
+                    <th>Gedung</th>
+                    <th>Lantai Gedung</th>
                     <th>Kapasitas</th>
+                    <th>Fasilitas</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -29,8 +31,10 @@
                     <tr>
                         <td><strong>{{ $room->code }}</strong></td>
                         <td>{{ $room->name }}</td>
-                        <td>{{ trim(($room->building ?? '-') . ' ' . ($room->floor ? 'Lt. '.$room->floor : '')) }}</td>
+                        <td>{{ $room->buildingRecord?->name ?? $room->building ?? '-' }}</td>
+                        <td>{{ $room->buildingRecord?->floor ?? '-' }}</td>
                         <td>{{ $room->capacity }}</td>
+                        <td>{{ $room->facilities ?? '-' }}</td>
                         <td>@include('partials.status-badge', ['status' => $room->is_active])</td>
                         <td>
                             <div class="actions">
@@ -45,7 +49,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6"><div class="empty-state">Belum ada data ruangan.</div></td></tr>
+                    <tr><td colspan="8"><div class="empty-state">Belum ada data ruangan.</div></td></tr>
                 @endforelse
                 </tbody>
             </table>

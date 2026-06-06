@@ -14,6 +14,7 @@
             $isAdmin ? ['label' => 'Riwayat Pengajuan Ruang', 'route' => 'room-request-history.index', 'match' => 'room-request-history.*', 'icon' => 'history'] : null,
         ]),
         'Akademik' => array_filter([
+            $isAdmin ? ['label' => 'Gedung', 'route' => 'buildings.index', 'match' => 'buildings.*', 'icon' => 'domain'] : null,
             $isAdmin ? ['label' => 'Ruangan', 'route' => 'rooms.index', 'match' => 'rooms.*', 'icon' => 'apartment'] : null,
             $isAdmin ? ['label' => 'Mata Kuliah', 'route' => 'courses.index', 'match' => 'courses.*', 'icon' => 'menu_book'] : null,
             $isAdmin ? ['label' => 'Jadwal Kuliah', 'route' => 'schedules.index', 'match' => 'schedules.*', 'icon' => 'calendar_month'] : null,

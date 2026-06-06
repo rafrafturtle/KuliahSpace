@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Building;
 use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,11 +16,13 @@ class RoomController extends Controller
         $search = $request->string('search')->toString();
 
         $rooms = Room::query()
+            ->with('buildingRecord')
             ->when($search, function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('code', 'like', "%{$search}%")
                         ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('building', 'like', "%{$search}%");
+                        ->orWhere('building', 'like', "%{$search}%")
+                        ->orWhereHas('buildingRecord', fn ($query) => $query->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"));
                 });
             })
             ->orderBy('code')
@@ -31,7 +34,7 @@ class RoomController extends Controller
 
     public function create(): View
     {
-        return view('rooms.create', ['room' => new Room(['is_active' => true])]);
+        return view('rooms.create', $this->formData(new Room(['is_active' => true])));
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,14 +48,14 @@ class RoomController extends Controller
 
     public function show(Room $room): View
     {
-        $room->load(['classSchedules.course', 'roomRequests.requester']);
+        $room->load(['buildingRecord', 'classSchedules.course', 'roomRequests.requester']);
 
         return view('rooms.show', compact('room'));
     }
 
     public function edit(Room $room): View
     {
-        return view('rooms.edit', compact('room'));
+        return view('rooms.edit', $this->formData($room));
     }
 
     public function update(Request $request, Room $room): RedirectResponse
@@ -76,15 +79,23 @@ class RoomController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50', Rule::unique('rooms', 'code')->ignore($room?->id)],
             'name' => ['required', 'string', 'max:255'],
-            'building' => ['nullable', 'string', 'max:255'],
-            'floor' => ['nullable', 'string', 'max:50'],
+            'building_id' => ['required', 'uuid', 'exists:buildings,id'],
             'capacity' => ['required', 'integer', 'min:1'],
             'facilities' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        $validated['building'] = Building::whereKey($validated['building_id'])->value('name');
         $validated['is_active'] = $request->boolean('is_active');
 
         return $validated;
+    }
+
+    private function formData(Room $room): array
+    {
+        return [
+            'room' => $room,
+            'buildings' => Building::orderByDesc('is_active')->orderBy('name')->get(),
+        ];
     }
 }

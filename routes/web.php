@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\CourseClassLeaderController;
 use App\Http\Controllers\CourseController;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('dashboard');
 
     Route::middleware('role:admin')->group(function (): void {
+        Route::resource('buildings', BuildingController::class);
         Route::resource('rooms', RoomController::class);
         Route::resource('courses', CourseController::class);
         Route::resource('semesters', SemesterController::class)->except(['show']);
@@ -46,11 +48,11 @@ Route::middleware('auth')->group(function (): void {
     });
 
     Route::resource('schedules', ClassScheduleController::class)
-        ->only(['index', 'show'])
-        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa');
-    Route::resource('schedules', ClassScheduleController::class)
         ->except(['index', 'show'])
         ->middleware('role:admin');
+    Route::resource('schedules', ClassScheduleController::class)
+        ->only(['index', 'show'])
+        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa');
 
     Route::get('/room-availability', [RoomAvailabilityController::class, 'index'])
         ->middleware('role:admin,dosen,ketua_kelas,mahasiswa')

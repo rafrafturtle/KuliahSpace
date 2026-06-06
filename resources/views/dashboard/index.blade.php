@@ -15,6 +15,14 @@
         </div>
         <div class="bento-card">
             <div class="actions" style="justify-content: space-between;">
+                <h2>Gedung Aktif</h2>
+                <span class="nav-icon material-symbols-rounded" style="background:#f1f5f9;color:#31516f;">domain</span>
+            </div>
+            <div class="metric">{{ $totalActiveBuildings }}</div>
+            <div class="muted">Gedung yang memiliki data aktif</div>
+        </div>
+        <div class="bento-card">
+            <div class="actions" style="justify-content: space-between;">
                 <h2>Jadwal Aktif</h2>
                 <span class="nav-icon material-symbols-rounded" style="background:#e8f3ff;color:#0b60eb;">calendar_month</span>
             </div>

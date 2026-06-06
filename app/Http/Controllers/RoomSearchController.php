@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
-use App\Models\Room;
+use App\Models\Building;
 use App\Models\Semester;
 use App\Services\RoomAvailabilityService;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ class RoomSearchController extends Controller
 {
     public function index(Request $request, RoomAvailabilityService $availabilityService): View
     {
-        $searchKeys = ['date', 'start_time', 'end_time', 'semester_id', 'academic_year_id', 'capacity', 'building'];
+        $searchKeys = ['date', 'start_time', 'end_time', 'semester_id', 'academic_year_id', 'capacity', 'building', 'building_id'];
         $searchSubmitted = collect($searchKeys)->contains(fn (string $key) => $request->has($key));
 
         $this->ensureCompleteTimeRange($request);
@@ -27,7 +27,13 @@ class RoomSearchController extends Controller
             'academic_year_id' => ['nullable', 'uuid', 'exists:academic_years,id'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'building' => ['nullable', 'string', 'max:255'],
+            'building_id' => ['nullable', 'uuid', 'exists:buildings,id'],
         ]);
+
+        if (empty($criteria['building_id']) && ! empty($criteria['building'])) {
+            $legacyBuilding = Building::where('name', $criteria['building'])->first();
+            $criteria['building_id'] = $legacyBuilding?->id;
+        }
 
         $availability = $searchSubmitted && filled($criteria['date'] ?? null)
             ? $availabilityService->getAvailabilityByDate(
@@ -37,7 +43,8 @@ class RoomSearchController extends Controller
                 $criteria['semester_id'] ?? null,
                 $criteria['academic_year_id'] ?? null,
                 $criteria['capacity'] ?? null,
-                $criteria['building'] ?? null,
+                empty($criteria['building_id']) ? ($criteria['building'] ?? null) : null,
+                $criteria['building_id'] ?? null,
             )
             : null;
 
@@ -47,12 +54,7 @@ class RoomSearchController extends Controller
             'searchSubmitted' => $searchSubmitted,
             'semesters' => Semester::orderByDesc('is_active')->orderBy('name')->get(),
             'academicYears' => AcademicYear::orderByDesc('is_active')->orderByDesc('name')->get(),
-            'buildings' => Room::where('is_active', true)
-                ->whereNotNull('building')
-                ->where('building', '<>', '')
-                ->distinct()
-                ->orderBy('building')
-                ->pluck('building'),
+            'buildings' => Building::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

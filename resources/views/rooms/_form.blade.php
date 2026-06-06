@@ -11,12 +11,16 @@
         @error('name') <span class="field-error">{{ $message }}</span> @enderror
     </div>
     <div class="form-field">
-        <label for="building">Gedung</label>
-        <input id="building" name="building" type="text" value="{{ old('building', $room->building) }}">
-    </div>
-    <div class="form-field">
-        <label for="floor">Lantai</label>
-        <input id="floor" name="floor" type="text" value="{{ old('floor', $room->floor) }}">
+        <label for="building_id">Gedung</label>
+        <select id="building_id" name="building_id" required>
+            <option value="">Pilih gedung</option>
+            @foreach ($buildings as $building)
+                <option value="{{ $building->id }}" @selected(old('building_id', $room->building_id) === $building->id)>
+                    {{ $building->name }}{{ $building->floor ? ' - Lantai '.$building->floor : '' }}{{ $building->is_active ? '' : ' (nonaktif)' }}
+                </option>
+            @endforeach
+        </select>
+        @error('building_id') <span class="field-error">{{ $message }}</span> @enderror
     </div>
     <div class="form-field">
         <label for="capacity">Kapasitas</label>

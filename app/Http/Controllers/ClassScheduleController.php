@@ -37,7 +37,7 @@ class ClassScheduleController extends Controller
         $selectedAcademicYearId = $request->has('academic_year_id') ? ($filters['academic_year_id'] ?? null) : $activeAcademicYear?->id;
         $hasTimeRange = ! empty($filters['start_time']) && ! empty($filters['end_time']);
 
-        $schedules = ClassSchedule::with(['course', 'lecturer', 'room', 'semester', 'academicYear'])
+        $schedules = ClassSchedule::with(['course', 'lecturer', 'room.buildingRecord', 'semester', 'academicYear'])
             ->where('is_active', true)
             ->when($filters['day_of_week'] ?? null, fn ($query, $day) => $query->where('day_of_week', $day))
             ->when($selectedSemesterId, fn ($query) => $query->where('semester_id', $selectedSemesterId))
@@ -56,7 +56,7 @@ class ClassScheduleController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        $activeRooms = Room::where('is_active', true)->orderBy('code')->get();
+        $activeRooms = Room::with('buildingRecord')->where('is_active', true)->orderBy('code')->get();
         $schedulesByDay = $schedules->groupBy('day_of_week');
         $displayDays = ($filters['day_of_week'] ?? null)
             ? [$filters['day_of_week'] => $dayLabels[$filters['day_of_week']]]
@@ -109,7 +109,7 @@ class ClassScheduleController extends Controller
 
     public function show(ClassSchedule $schedule): View
     {
-        $schedule->load(['course', 'lecturer', 'room', 'semester', 'academicYear']);
+        $schedule->load(['course', 'lecturer', 'room.buildingRecord', 'semester', 'academicYear']);
 
         return view('schedules.show', [
             'schedule' => $schedule,
@@ -187,7 +187,7 @@ class ClassScheduleController extends Controller
             'schedule' => $schedule,
             'courses' => Course::orderBy('code')->get(),
             'lecturers' => User::with('roles')->orderBy('name')->get(),
-            'rooms' => Room::where('is_active', true)->orderBy('code')->get(),
+            'rooms' => Room::with('buildingRecord')->where('is_active', true)->orderBy('code')->get(),
             'semesters' => Semester::orderByDesc('is_active')->orderBy('name')->get(),
             'academicYears' => AcademicYear::orderByDesc('is_active')->orderByDesc('name')->get(),
             'days' => $this->days(),

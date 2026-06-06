@@ -122,11 +122,13 @@
                         </select>
                     </div>
                     <div class="form-field">
-                        <label for="building">Gedung</label>
-                        <select id="building" name="building">
+                        <label for="building_id">Gedung</label>
+                        <select id="building_id" name="building_id">
                             <option value="">Semua gedung</option>
                             @foreach ($buildings as $building)
-                                <option value="{{ $building }}" @selected(old('building', $criteria['building'] ?? '') === $building)>{{ $building }}</option>
+                                <option value="{{ $building->id }}" @selected(old('building_id', $criteria['building_id'] ?? '') === $building->id)>
+                                    {{ $building->name }}{{ $building->floor ? ' - Lantai '.$building->floor : '' }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

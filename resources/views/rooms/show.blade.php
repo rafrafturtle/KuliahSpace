@@ -14,8 +14,9 @@
                 <dl class="detail-list">
                     <dt>Kode</dt><dd>{{ $room->code }}</dd>
                     <dt>Nama</dt><dd>{{ $room->name }}</dd>
-                    <dt>Gedung</dt><dd>{{ $room->building ?? '-' }}</dd>
-                    <dt>Lantai</dt><dd>{{ $room->floor ?? '-' }}</dd>
+                    <dt>Gedung</dt><dd>{{ $room->buildingRecord?->name ?? $room->building ?? '-' }}</dd>
+                    <dt>Lantai Gedung</dt><dd>{{ $room->buildingRecord?->floor ?? '-' }}</dd>
+                    <dt>Kode Gedung</dt><dd>{{ $room->buildingRecord?->code ?? '-' }}</dd>
                     <dt>Kapasitas</dt><dd>{{ $room->capacity }}</dd>
                     <dt>Fasilitas</dt><dd>{{ $room->facilities ?? '-' }}</dd>
                     <dt>Status</dt><dd>@include('partials.status-badge', ['status' => $room->is_active])</dd>

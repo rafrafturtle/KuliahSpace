@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
@@ -14,6 +15,7 @@ class Room extends Model
     protected $fillable = [
         'code',
         'name',
+        'building_id',
         'building',
         'floor',
         'capacity',
@@ -32,6 +34,16 @@ class Room extends Model
     public function classSchedules(): HasMany
     {
         return $this->hasMany(ClassSchedule::class);
+    }
+
+    public function building(): BelongsTo
+    {
+        return $this->belongsTo(Building::class);
+    }
+
+    public function buildingRecord(): BelongsTo
+    {
+        return $this->belongsTo(Building::class, 'building_id');
     }
 
     public function roomRequests(): HasMany

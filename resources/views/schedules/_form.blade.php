@@ -32,7 +32,7 @@
             <option value="">Pilih ruangan</option>
             @foreach ($rooms as $room)
                 <option value="{{ $room->id }}" @selected(old('room_id', $schedule->room_id) === $room->id)>
-                    {{ $room->code }} - {{ $room->name }} ({{ $room->capacity }})
+                    {{ $room->code }} - {{ $room->name }} | {{ $room->buildingRecord?->name ?? $room->building ?? 'Gedung belum diisi' }} ({{ $room->capacity }})
                 </option>
             @endforeach
         </select>

@@ -22,7 +22,7 @@ class RoomRequestController extends Controller
     {
         $search = $request->string('search')->toString();
 
-        $roomRequests = RoomRequest::with(['requester', 'room', 'approver'])
+        $roomRequests = RoomRequest::with(['requester', 'room.buildingRecord', 'approver'])
             ->where('status', RoomRequest::STATUS_PENDING)
             ->when(! $this->currentUserIsAdmin(), fn ($query) => $query->where('requester_id', $request->user()->id))
             ->when($search, function ($query) use ($search): void {
@@ -69,7 +69,7 @@ class RoomRequestController extends Controller
     {
         $this->authorizeRoomRequestAccess($roomRequest);
 
-        $roomRequest->load(['requester', 'room', 'approver']);
+        $roomRequest->load(['requester', 'room.buildingRecord', 'approver']);
 
         return view('room-requests.show', [
             'roomRequest' => $roomRequest,
@@ -219,7 +219,7 @@ class RoomRequestController extends Controller
         return [
             'roomRequest' => $roomRequest,
             'requesters' => User::with('roles')->orderBy('name')->get(),
-            'rooms' => Room::where('is_active', true)->orderBy('code')->get(),
+            'rooms' => Room::with('buildingRecord')->where('is_active', true)->orderBy('code')->get(),
             'statuses' => RoomRequest::STATUSES,
             'canChooseRequester' => $this->currentUserIsAdmin(),
             'canEditStatus' => $this->currentUserIsAdmin(),

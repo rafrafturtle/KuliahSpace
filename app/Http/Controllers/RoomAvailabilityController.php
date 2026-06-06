@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
-use App\Models\Room;
+use App\Models\Building;
 use App\Models\Semester;
 use App\Services\RoomAvailabilityService;
 use Carbon\Carbon;
@@ -50,19 +50,71 @@ class RoomAvailabilityController extends Controller
             'academic_year_id' => ['nullable', 'uuid', 'exists:academic_years,id'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'building' => ['nullable', 'string', 'max:255'],
+            'building_id' => ['nullable', 'uuid', 'exists:buildings,id'],
+            'room_id' => ['nullable', 'uuid', 'exists:rooms,id'],
             'month' => ['nullable', 'integer', 'between:1,12'],
             'year' => ['nullable', 'integer', 'between:2000,2100'],
         ]);
 
-        $timeline = $availabilityService->getRoomTimelineByDate(
+        if (empty($filters['building_id']) && ! empty($filters['building'])) {
+            $legacyBuilding = Building::where('name', $filters['building'])->first();
+            $filters['building_id'] = $legacyBuilding?->id;
+        }
+
+        $buildingAvailability = $availabilityService->getBuildingsAvailabilityByDate(
             $selectedDate->toDateString(),
             $filters['start_time'] ?? null,
             $filters['end_time'] ?? null,
             $filters['semester_id'] ?? null,
             $filters['academic_year_id'] ?? null,
             $filters['capacity'] ?? null,
-            $filters['building'] ?? null,
         );
+
+        $selectedBuilding = null;
+        $selectedRoom = null;
+        $roomsAvailability = null;
+        $roomTimeline = null;
+
+        if (! empty($filters['building_id'])) {
+            $selectedBuilding = Building::findOrFail($filters['building_id']);
+        }
+
+        if (! empty($filters['room_id'])) {
+            $roomTimeline = $availabilityService->getRoomTimeline(
+                $selectedDate->toDateString(),
+                $filters['room_id'],
+                $filters['start_time'] ?? null,
+                $filters['end_time'] ?? null,
+                $filters['semester_id'] ?? null,
+                $filters['academic_year_id'] ?? null,
+                $filters['capacity'] ?? null,
+            );
+
+            abort_if($roomTimeline === null, 404);
+
+            $selectedRoom = $roomTimeline['room'];
+
+            if (! $selectedBuilding && $selectedRoom->building_id) {
+                $selectedBuilding = $selectedRoom->buildingRecord;
+                $filters['building_id'] = $selectedRoom->building_id;
+            }
+
+            if ($selectedBuilding && $selectedRoom->building_id !== $selectedBuilding->id) {
+                abort(404);
+            }
+        }
+
+        if ($selectedBuilding) {
+            $roomsAvailability = $availabilityService->getRoomsAvailabilityByBuilding(
+                $selectedDate->toDateString(),
+                $selectedBuilding->id,
+                $filters['start_time'] ?? null,
+                $filters['end_time'] ?? null,
+                $filters['semester_id'] ?? null,
+                $filters['academic_year_id'] ?? null,
+                $filters['capacity'] ?? null,
+            );
+        }
 
         $backQuery = [
             'month' => $filters['month'] ?? $selectedDate->month,
@@ -70,12 +122,16 @@ class RoomAvailabilityController extends Controller
         ];
 
         return view('room-availability.detail', $this->formData([
-            'timeline' => $timeline,
+            'buildingAvailability' => $buildingAvailability,
+            'roomsAvailability' => $roomsAvailability,
+            'roomTimeline' => $roomTimeline,
             'criteria' => $filters,
             'selectedDate' => $selectedDate,
             'selectedDayLabel' => $this->dayLabels()[$selectedDate->format('l')],
+            'selectedBuilding' => $selectedBuilding,
+            'selectedRoom' => $selectedRoom,
             'backQuery' => $backQuery,
-            'totalRooms' => $timeline['totalRooms'],
+            'totalRooms' => $buildingAvailability['totalRooms'],
         ]));
     }
 
@@ -91,6 +147,7 @@ class RoomAvailabilityController extends Controller
             'academic_year_id' => ['nullable', 'uuid', 'exists:academic_years,id'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'building' => ['nullable', 'string', 'max:255'],
+            'building_id' => ['nullable', 'uuid', 'exists:buildings,id'],
         ]);
 
         return redirect()->route('room-search.index', array_filter(
@@ -119,6 +176,9 @@ class RoomAvailabilityController extends Controller
         return $extra + [
             'availability' => null,
             'timeline' => null,
+            'buildingAvailability' => null,
+            'roomsAvailability' => null,
+            'roomTimeline' => null,
             'criteria' => [],
             'calendarMonth' => now()->startOfMonth(),
             'calendarWeeks' => [],
@@ -127,16 +187,13 @@ class RoomAvailabilityController extends Controller
             'nextMonth' => now()->startOfMonth()->addMonth(),
             'selectedDate' => null,
             'selectedDayLabel' => null,
+            'selectedBuilding' => null,
+            'selectedRoom' => null,
             'backQuery' => [],
             'totalRooms' => 0,
             'semesters' => Semester::orderByDesc('is_active')->orderBy('name')->get(),
             'academicYears' => AcademicYear::orderByDesc('is_active')->orderByDesc('name')->get(),
-            'buildings' => Room::where('is_active', true)
-                ->whereNotNull('building')
-                ->where('building', '<>', '')
-                ->distinct()
-                ->orderBy('building')
-                ->pluck('building'),
+            'buildings' => Building::where('is_active', true)->orderBy('name')->get(),
         ];
     }
 

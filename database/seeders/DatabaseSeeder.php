@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\AcademicYear;
+use App\Models\Building;
 use App\Models\ClassSchedule;
 use App\Models\Course;
 use App\Models\CourseClassLeader;
@@ -53,13 +54,40 @@ class DatabaseSeeder extends Seeder
             Bouncer::assign('dosen')->to([$dosenA, $dosenB]);
             Bouncer::assign('mahasiswa')->to($students->all());
 
+            $buildings = collect([
+                ['name' => 'Gedung FKIP 1', 'code' => 'FKIP-1', 'floor' => '1, 2, 3', 'description' => null, 'is_active' => true],
+                ['name' => 'Gedung FKIP 2', 'code' => 'FKIP-2', 'floor' => '1', 'description' => null, 'is_active' => true],
+                ['name' => 'Gedung Aula', 'code' => 'AULA', 'floor' => '1', 'description' => null, 'is_active' => true],
+            ])->mapWithKeys(function (array $building): array {
+                $model = Building::updateOrCreate(
+                    ['name' => $building['name']],
+                    $building
+                );
+
+                return [$building['name'] => $model];
+            });
+
             $rooms = collect([
-                ['code' => 'R-101', 'name' => 'Ruang Kuliah 101', 'building' => 'Gedung A', 'floor' => '1', 'capacity' => 40, 'facilities' => 'LCD, papan tulis, AC', 'is_active' => true],
-                ['code' => 'R-102', 'name' => 'Ruang Kuliah 102', 'building' => 'Gedung A', 'floor' => '1', 'capacity' => 35, 'facilities' => 'LCD, papan tulis', 'is_active' => true],
-                ['code' => 'LAB-201', 'name' => 'Laboratorium Komputer', 'building' => 'Gedung B', 'floor' => '2', 'capacity' => 30, 'facilities' => 'Komputer, proyektor, AC', 'is_active' => true],
-                ['code' => 'AUD-301', 'name' => 'Aula Akademik', 'building' => 'Gedung C', 'floor' => '3', 'capacity' => 120, 'facilities' => 'Sound system, proyektor, podium', 'is_active' => true],
-                ['code' => 'R-202', 'name' => 'Ruang Diskusi 202', 'building' => 'Gedung B', 'floor' => '2', 'capacity' => 24, 'facilities' => 'Smart TV, papan tulis', 'is_active' => true],
-            ])->map(fn (array $room) => Room::create($room));
+                ['code' => 'R-1', 'name' => 'Ruang Fuad Hasan', 'building_name' => 'Gedung FKIP 1', 'capacity' => 60, 'facilities' => 'papan tulis, AC, kipas angin, proyektor', 'is_active' => true],
+                ['code' => 'R-2', 'name' => 'Ruang Ahmad Dahlan', 'building_name' => 'Gedung FKIP 1', 'capacity' => 60, 'facilities' => 'papan tulis, AC, kipas angin, proyektor', 'is_active' => true],
+                ['code' => 'R-3', 'name' => 'R.A Kartini', 'building_name' => 'Gedung FKIP 1', 'capacity' => 60, 'facilities' => 'papan tulis, AC, kipas angin, proyektor', 'is_active' => true],
+                ['code' => 'R-4', 'name' => 'Ruang Ki Hajar Dewantara', 'building_name' => 'Gedung FKIP 1', 'capacity' => 120, 'facilities' => 'papan tulis, AC, kipas angin, proyektor, mikrofon, speaker', 'is_active' => true],
+                ['code' => 'R-101', 'name' => 'Aula Hasan Bondan', 'building_name' => 'Gedung Aula', 'capacity' => 200, 'facilities' => 'papan tulis, AC, kipas angin, proyektor, podium', 'is_active' => true],
+                ['code' => 'R-201', 'name' => 'Lab Pendidikan Komputer', 'building_name' => 'Gedung FKIP 1', 'capacity' => 60, 'facilities' => 'papan tulis, AC, proyektor, komputer', 'is_active' => true],
+                ['code' => 'R-202', 'name' => 'Lab Komputer PGSD', 'building_name' => 'Gedung FKIP 2', 'capacity' => 60, 'facilities' => 'papan tulis, AC, proyektor, komputer', 'is_active' => true],
+            ])->map(function (array $room) use ($buildings): Room {
+                $building = $buildings->get($room['building_name']);
+                unset($room['building_name']);
+
+                return Room::updateOrCreate(
+                    ['code' => $room['code']],
+                    $room + [
+                        'building_id' => $building?->id,
+                        'building' => $building?->name,
+                        'floor' => null,
+                    ]
+                );
+            })->values();
 
             $courses = collect([
                 ['code' => 'IF101', 'name' => 'Algoritma dan Pemrograman', 'credits' => 3],
