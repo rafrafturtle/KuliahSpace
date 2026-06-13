@@ -4,13 +4,17 @@
 @section('subtitle', 'Kelola ruang kuliah, kapasitas, fasilitas, dan status aktif.')
 
 @section('content')
+    @php($canManageRooms = auth()->user()->isAn('admin'))
+
     <div class="panel">
         <div class="panel-header">
             <form class="search-form" method="GET" action="{{ route('rooms.index') }}">
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari kode, nama, gedung">
                 <button class="btn btn-soft" type="submit">Cari</button>
             </form>
-            <a class="btn btn-primary" href="{{ route('rooms.create') }}">Tambah Ruangan</a>
+            @if ($canManageRooms)
+                <a class="btn btn-primary" href="{{ route('rooms.create') }}">Tambah Ruangan</a>
+            @endif
         </div>
         <div class="table-wrap">
             <table>
@@ -39,12 +43,14 @@
                         <td>
                             <div class="actions">
                                 <a class="btn btn-small" href="{{ route('rooms.show', $room) }}">Detail</a>
-                                <a class="btn btn-small btn-soft" href="{{ route('rooms.edit', $room) }}">Edit</a>
-                                <form method="POST" action="{{ route('rooms.destroy', $room) }}" onsubmit="return confirm('Hapus ruangan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-small btn-danger" type="submit">Hapus</button>
-                                </form>
+                                @if ($canManageRooms)
+                                    <a class="btn btn-small btn-soft" href="{{ route('rooms.edit', $room) }}">Edit</a>
+                                    <form method="POST" action="{{ route('rooms.destroy', $room) }}" onsubmit="return confirm('Hapus ruangan ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-small btn-danger" type="submit">Hapus</button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

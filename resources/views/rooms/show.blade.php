@@ -4,11 +4,20 @@
 @section('subtitle', $room->code . ' - ' . $room->name)
 
 @section('content')
+    @php($canManageRooms = auth()->user()->isAn('admin'))
+    @php($roomImage = $room->image_path ?: 'images/rooms/default-room.png')
+
+    <div class="panel room-photo-panel">
+        <img class="room-photo" src="{{ asset($roomImage) }}" alt="Tampilan isi {{ $room->name }}">
+    </div>
+
     <div class="grid grid-2">
         <div class="panel">
             <div class="panel-header">
                 <h2>Informasi Ruangan</h2>
-                <a class="btn btn-small btn-soft" href="{{ route('rooms.edit', $room) }}">Edit</a>
+                @if ($canManageRooms)
+                    <a class="btn btn-small btn-soft" href="{{ route('rooms.edit', $room) }}">Edit</a>
+                @endif
             </div>
             <div class="panel-body">
                 <dl class="detail-list">

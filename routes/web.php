@@ -35,8 +35,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('dashboard');
 
     Route::middleware('role:admin')->group(function (): void {
-        Route::resource('buildings', BuildingController::class);
-        Route::resource('rooms', RoomController::class);
+        Route::resource('buildings', BuildingController::class)->except(['index', 'show']);
+        Route::resource('rooms', RoomController::class)->except(['index', 'show']);
         Route::resource('courses', CourseController::class);
         Route::resource('semesters', SemesterController::class)->except(['show']);
         Route::resource('academic-years', AcademicYearController::class)
@@ -46,6 +46,13 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
         Route::post('/users/{user}/roles', [UserRoleController::class, 'update'])->name('users.roles.update');
     });
+
+    Route::resource('buildings', BuildingController::class)
+        ->only(['index', 'show'])
+        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa');
+    Route::resource('rooms', RoomController::class)
+        ->only(['index', 'show'])
+        ->middleware('role:admin,dosen,ketua_kelas,mahasiswa');
 
     Route::resource('schedules', ClassScheduleController::class)
         ->except(['index', 'show'])

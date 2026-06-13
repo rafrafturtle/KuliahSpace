@@ -543,6 +543,28 @@
         .error-box { background: var(--red-soft); border: 1px solid #ffd1da; color: var(--red); }
         .empty-state { background: #f6faff; border: 1px dashed #bcd4f1; color: var(--muted); }
         .pagination { margin-top: 18px; }
+        .pagination svg {
+            width: 20px;
+            height: 20px;
+            max-width: 20px;
+            max-height: 20px;
+            flex-shrink: 0;
+        }
+        .pagination nav {
+            display: grid;
+            gap: 10px;
+        }
+        .pagination nav > div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pagination a,
+        .pagination span {
+            line-height: 1.25;
+        }
         .detail-list { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 12px 18px; }
         .detail-list dt { color: var(--muted); font-weight: 750; }
         .detail-list dd { margin: 0; font-weight: 800; }
@@ -560,6 +582,17 @@
         }
         .room-card h3 { margin: 0; font-size: 17px; font-weight: 900; letter-spacing: -.3px; }
         .room-card-meta { display: grid; gap: 5px; color: var(--muted); font-size: 13px; font-weight: 650; }
+        .room-photo-panel { padding: 12px; margin-bottom: 18px; overflow: hidden; }
+        .room-photo {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: var(--surface-muted);
+            box-shadow: 0 14px 30px rgba(5, 38, 109, .08);
+        }
 
         @media (max-width: 1100px) { .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 980px) {

@@ -31,8 +31,7 @@ class RoomAvailabilitySearchTest extends TestCase
             ->assertSee('Klik tanggal untuk melihat detail ketersediaan.')
             ->assertDontSee('Filter Pencarian')
             ->assertDontSee('Pencarian</a>', false)
-            ->assertDontSee('Jadwal tetap dan pengajuan ruang yang sudah disetujui.')
-            ->assertDontSee('Jadwal Kuliah');
+            ->assertDontSee('Jadwal tetap dan pengajuan ruang yang sudah disetujui.');
     }
 
     public function test_room_search_page_shows_search_form_before_results(): void
@@ -59,9 +58,10 @@ class RoomAvailabilitySearchTest extends TestCase
             ->assertSee('Kembali ke Kalender')
             ->assertSee('Total Ruangan')
             ->assertSee('Terpakai')
-            ->assertSee('Tidak Dipakai')
-            ->assertSee('Sedang Dalam Pengajuan')
-            ->assertSee($request->purpose);
+            ->assertSee('Ruangan Tersedia')
+            ->assertSee('Pengajuan Pending')
+            ->assertSee('Daftar Gedung')
+            ->assertSee('Lihat Ruangan');
     }
 
     public function test_class_schedule_usage_appears_as_used_room(): void

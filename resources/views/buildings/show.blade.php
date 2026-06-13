@@ -4,11 +4,15 @@
 @section('subtitle', $building->name)
 
 @section('content')
+    @php($canManageBuildings = auth()->user()->isAn('admin'))
+
     <div class="grid grid-2">
         <div class="panel">
             <div class="panel-header">
                 <h2>Informasi Gedung</h2>
-                <a class="btn btn-small btn-soft" href="{{ route('buildings.edit', $building) }}">Edit</a>
+                @if ($canManageBuildings)
+                    <a class="btn btn-small btn-soft" href="{{ route('buildings.edit', $building) }}">Edit</a>
+                @endif
             </div>
             <div class="panel-body">
                 <dl class="detail-list">

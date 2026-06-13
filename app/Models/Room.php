@@ -20,6 +20,7 @@ class Room extends Model
         'floor',
         'capacity',
         'facilities',
+        'image_path',
         'is_active',
     ];
 
