@@ -8,6 +8,10 @@
     </div>
 
     <div class="topbar-note">
+        <button id="themeToggle" class="btn btn-small btn-soft" type="button" title="Ganti tema">
+            <span id="themeIcon" class="material-symbols-rounded" style="font-size: 18px;">dark_mode</span>
+        </button>
+
         <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
         <div class="user-info">
             <strong>{{ auth()->user()->name }}</strong>

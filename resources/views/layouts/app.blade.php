@@ -12,6 +12,10 @@
             if (localStorage.getItem('kuliahspace.sidebar') === 'collapsed') {
                 document.documentElement.classList.add('sidebar-collapsed');
             }
+
+            if (localStorage.getItem('kuliahspace.theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
         } catch (error) {}
     </script>
     <style>
@@ -40,6 +44,97 @@
             --radius: 24px;
             --radius-sm: 16px;
             --sidebar-width: 286px;
+        }
+
+        html.dark {
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, .92);
+            --surface-solid: #1e293b;
+            --surface-muted: #334155;
+            --line: #475569;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --soft-blue: #172554;
+            --soft-blue-2: #1e3a8a;
+            --green-soft: rgba(15, 143, 101, .18);
+            --amber-soft: rgba(183, 121, 5, .18);
+            --red-soft: rgba(217, 59, 82, .18);
+            --shadow: 0 24px 70px rgba(0, 0, 0, .35);
+            --shadow-soft: 0 14px 35px rgba(0, 0, 0, .25);
+        }
+
+        html.dark body {
+            background:
+                radial-gradient(circle at 12% 8%, rgba(59, 130, 246, .20), transparent 28%),
+                radial-gradient(circle at 92% 12%, rgba(37, 99, 235, .18), transparent 30%),
+                linear-gradient(135deg, #020617 0%, #0f172a 55%, #111827 100%);
+        }
+
+        html.dark body::before {
+            background-image:
+                linear-gradient(rgba(148, 163, 184, .06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, .06) 1px, transparent 1px);
+        }
+
+        html.dark .topbar,
+        html.dark .panel,
+        html.dark .bento-card,
+        html.dark .room-card {
+            background: var(--surface);
+            border-color: var(--line);
+        }
+
+        html.dark .panel-header {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            border-bottom-color: var(--line);
+        }
+
+        html.dark .topbar-note,
+        html.dark .empty-state {
+            background: #1e293b;
+            border-color: #475569;
+        }
+
+        html.dark th {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        html.dark td {
+            color: #e2e8f0;
+        }
+
+        html.dark tbody tr:hover {
+            background: rgba(51, 65, 85, .65);
+        }
+
+        html.dark input,
+        html.dark select,
+        html.dark textarea,
+        html.dark .btn {
+            background: #1e293b;
+            border-color: #475569;
+            color: #f8fafc;
+        }
+
+        html.dark .btn-soft {
+            background: #172554;
+            border-color: #1d4ed8;
+            color: #bfdbfe;
+        }
+
+        html.dark label {
+            color: #e2e8f0;
+        }
+
+        html.dark .room-card {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+        }
+
+        html.dark .status-inactive,
+        html.dark .status-cancelled {
+            background: rgba(100, 116, 139, .22);
+            color: #cbd5e1;
         }
 
         * { box-sizing: border-box; }
@@ -617,6 +712,39 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.style.cursor = '';
         });
     }
+
+    const topbarNote = document.querySelector('.topbar-note');
+
+    if (topbarNote && !document.getElementById('themeToggle')) {
+        const themeButton = document.createElement('button');
+        themeButton.id = 'themeToggle';
+        themeButton.className = 'btn btn-small btn-soft';
+        themeButton.type = 'button';
+        themeButton.title = 'Ganti tema';
+        themeButton.innerHTML = '<span id="themeIcon" class="material-symbols-rounded" style="font-size: 18px;">dark_mode</span>';
+        topbarNote.prepend(themeButton);
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    function setTheme(theme) {
+        root.classList.toggle('dark', theme === 'dark');
+
+        if (themeIcon) {
+            themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+
+        try {
+            localStorage.setItem('kuliahspace.theme', theme);
+        } catch (error) {}
+    }
+
+    setTheme(localStorage.getItem('kuliahspace.theme') || 'light');
+
+    themeToggle?.addEventListener('click', function () {
+        setTheme(root.classList.contains('dark') ? 'light' : 'dark');
+    });
 
     var toggle = document.querySelector('[data-sidebar-toggle]');
     var toggleIcon = document.querySelector('[data-sidebar-toggle-icon]');

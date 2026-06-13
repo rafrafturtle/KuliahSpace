@@ -100,12 +100,58 @@
             visibility: hidden;
             transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
         }
+
+        
+
+
         .calendar-day:hover .calendar-summary,
         .calendar-day:focus-visible .calendar-summary {
             opacity: 1;
             transform: translateY(0);
             visibility: visible;
         }
+
+        html.dark .calendar-day {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+html.dark .calendar-day:hover,
+html.dark .calendar-day:focus-visible {
+    background: #263449;
+    border-color: #60a5fa;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+}
+
+html.dark .calendar-day.outside-month {
+    background: #111827;
+    opacity: .55;
+}
+
+html.dark .calendar-date-number {
+    color: #f8fafc;
+}
+
+html.dark .calendar-day.weekend .calendar-date-number {
+    color: #f87171;
+}
+
+html.dark .calendar-day.today {
+    border-color: #60a5fa;
+    box-shadow: inset 0 0 0 1px #60a5fa;
+}
+
+html.dark .calendar-day.today .calendar-date-number {
+    background: #172554;
+    color: #93c5fd;
+}
+
+html.dark .calendar-summary {
+    background: #0f172a;
+    border-color: #475569;
+    color: #cbd5e1;
+}
 
         @media (max-width: 760px) {
             .calendar-weekdays,
